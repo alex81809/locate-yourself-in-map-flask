@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Location Finder</title>
+    <link 
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+    <link 
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+    <script 
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+    </script>
+</head>
+
+<body>
+    <div class="form-container">
+
+        <form method="POST" action="/">
+            <label for="location">
+                Enter the location here:
+            </label>
+
+            <input
+                type="text"
+                id="location"
+                name="location"
+                placeholder="Enter a city or location"
+                required
+            >
+
+            <button type="submit">
+                Search
+            </button>
+        </form>
+    </div>
+
+    {% if error %}
+    <p class="error">
+        {{ error }}
+    </p>
+
+    {% endif %}
+    {% if data and data.latitude and data.longitude %}
+    <div class="details">
+        <h1>Location Details</h1>
+
+        <p>
+            <strong>Latitude:</strong>
+            {{ data.latitude }}
+        </p>
+
+        <p>
+            <strong>Longitude:</strong>
+            {{ data.longitude }}
+        </p>
+    </div>
+
+    {% endif %}
+
+
+    <div 
+    id="mapContainer"
+    data-lat="{{ data.latitude if data and data.latitude else '' }}"
+    data-lon="{{ data.longitude if data and data.longitude else '' }}"
+    ></div>
+
+    <script>
+
+        const container = document.getElementById('mapContainer');
+
+        const latStr = container.dataset.lat;
+        const lonStr = container.dataset.lon;
+
+        let lat = 20.5937;
+        let lon = 78.9629;
+        let zoom = 4;
+
+        if (latStr && lonStr) {
+
+            lat = parseFloat(latStr);
+            lon = parseFloat(lonStr);
+            zoom = 12;
+
+        }
+
+        const map = L.map("mapContainer").setView(
+            [lat, lon], 
+            zoom
+        );
+
+        L.tileLayer(
+            "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+            {
+                maxZoom: 19,
+
+                attribution:
+                "&copy; OpenStreetMap contributors"
+            }
+        ).addTo(map);
+
+        if (latStr && lonStr) {
+
+            L.marker([lat, lon])
+                .addTo(map)
+                .bindPopup(
+                    `<b>Location</b><br>
+                    Latitude: ${lat}<br>
+                    Longitude: ${lon}`
+                )
+                .openPopup();
+        }
+    </script>
+</body>
+</html>
